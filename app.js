@@ -17,7 +17,7 @@ const connect = async () => {
     // Call the runQueries function, which will eventually hold functions to work
     // with data in our db.
     // await runQueries()
-    await menu();
+     menu();
     
     // Disconnect our app from MongoDB after our queries run.
     // await mongoose.disconnect();
@@ -78,15 +78,27 @@ const viewCustomer = async () => {
 }
 
 const findCustomer = async () => {
-   let choice = prompt('How you want to access info by Name or Age?: ');
+   let choice = prompt('How you want to access info by Name or Age?: ').toLowerCase();;
     let customer
-    if ( choice === 'Name') {
+
+    if (choice === 'exit') {
+         menu();
+    }
+   
+    if (choice === 'name') {
         const name = prompt('Enter Customer Name: ');
-        customer = await Customer.findOne({ name: name });
-    } else if ( choice === 'Age'){
-        const age = parseInt(prompt('Enter Customer Age: '));
-        customer = await Customer.findOne({ age: age })
-    } else if (choice !== 'Name' || 'Age') {
+        if (name === 'exit') {
+            menu();
+        }
+        customer = await Customer.find({ name: name });
+    } else if ( choice === 'age') {
+        let age = prompt('Enter Customer Age: ');
+        if (age === 'exit') {
+            menu();
+        }
+        age = parseInt(age);
+        customer = await Customer.find({ age: age })
+    } else if (choice !== 'name' || 'age') {
         console.log('Please read instructions again!')
        return findCustomer();
     }
@@ -95,16 +107,28 @@ const findCustomer = async () => {
     menu();
 }
 
-const deleteCustomer = async () => {
-    const name = prompt('Enter Customer Name to be deleted: ');
-    const removedCustomer = await Customer.findOneAndDelete({
-        name: name
-    });
+const updateCustomer = async () => {
+    const customers = await Customer.find({})
+    console.log('All customers;', customers);
+   let crmUpdate = prompt('Please advise customer ID: ');
+   let newName = prompt('Please advise new name: ');
+   let newAge = parseInt(prompt('Please advise new age: '));
+   let updateCrm = await Customer.findByIdAndUpdate(
+    crmUpdate, {
+        name: newName,
+        age: newAge,
+    }, {new: true});
 
+    console.log('Updated customer:', updateCrm);
+    menu();    
+};
+
+const deleteCustomer = async () => {
+    const id = prompt('Enter Customer Id to be deleted: ');
+    const removedCustomer = await Customer.findByIdAndDelete(id);
     console.log('Removed Customer:', removedCustomer);
     menu();
     }
 
-
-
   connect();
+  
